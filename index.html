@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>הספרים שלנו</title>
+<meta name="theme-color" content="#8B4513">
+<link rel="manifest" href="manifest.json">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap');
+
+  :root {
+    --brown: #8B4513;
+    --brown-light: #C47A3A;
+    --cream: #F5E6C8;
+    --cream-dark: #E8D5A3;
+    --terra: #D85A30;
+    --bg: #FDF8F0;
+    --card-bg: #FFFFFF;
+    --text: #2C1810;
+    --text-muted: #7A5C4A;
+    --border: #E8D5A3;
+    --green: #3B6D11;
+    --green-light: #EAF3DE;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(139,69,19,0.1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* Header */
+  .header {
+    background: var(--brown);
+    padding: 1rem 1.25rem 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .header-title { color: var(--cream); font-size: 20px; font-weight: 700; }
+  .header-sub { color: var(--brown-light); font-size: 12px; }
+
+  .user-pills {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .pill {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all 0.15s;
+    font-family: 'Heebo', sans-serif;
+  }
+
+  .pill.active { background: var(--cream); color: var(--brown); font-weight: 700; }
+  .pill.inactive { background: rgba(245,230,200,0.15); color: var(--brown-light); border-color: rgba(245,230,200,0.3); }
+
+  /* Search */
+  .search-wrap { padding: 10px 1.25rem 0; }
+  .search-wrap input {
+    width: 100%;
+    padding: 9px 14px;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    background: white;
+    font-size: 14px;
+    font-family: 'Heebo', sans-serif;
+    color: var(--text);
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border);
+    background: white;
+    position: sticky;
+    top: 160px;
+    z-index: 90;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px 4px;
+    text-align: center;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-family: 'Heebo', sans-serif;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.15s;
+  }
+
+  .tab.active { color: var(--brown); border-bottom-color: var(--brown); font-weight: 700; }
+
+  /* Filters */
+  .filters {
+    display: flex;
+    gap: 6px;
+    padding: 10px 1.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .filter-btn {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: white;
+    white-space: nowrap;
+    font-family: 'Heebo', sans-serif;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+
+  .filter-btn.active { background: var(--brown); color: white; border-color: var(--brown); }
+
+  /* Sort */
+  .sort-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 1.25rem 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .sort-bar select {
+    font-size: 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 6px;
+    font-family: 'Heebo', sans-serif;
+    background: white;
+    color: var(--text);
+  }
+
+  /* Content */
+  .content { padding: 0 1.25rem 100px; }
+
+  /* Book Card */
+  .book-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 10px;
+    border-right: 4px solid var(--brown-light);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform 0.15s;
+    position: relative;
+  }
+
+  .book-card:active { transform: scale(0.98); }
+  .book-card.archived { opacity: 0.6; border-right-color: #ccc; }
+
+  .book-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .book-author { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+
+  .book-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+
+  .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .badge-location { background: #FDF3E3; color: var(--brown); }
+  .badge-read { background: var(--green-light); color: var(--green); }
+  .badge-unread { background: #F5F5F5; color: #888; }
+  .badge-wish { background: #FBEAF0; color: #993556; }
+  .badge-archived { background: #F0F0F0; color: #888; }
+  .badge-series { background: #E6F1FB; color: #185FA5; }
+
+  .book-stars { color: var(--brown-light); font-size: 13px; margin-bottom: 4px; }
+  .book-review { font-size: 12px; color: var(--text-muted); font-style: italic; }
+
+  .archive-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: opacity 0.15s;
+  }
+
+  .archive-btn:hover { opacity: 0.8; }
+
+  /* FAB */
+  .fab {
+    position: fixed;
+    bottom: 80px;
+    left: 20px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--brown);
+    color: white;
+    font-size: 24px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(139,69,19,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    transition: transform 0.15s;
+  }
+
+  .fab:active { transform: scale(0.9); }
+
+  /* Bottom Nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: white;
+    border-top: 1px solid var(--border);
+    display: flex;
+    z-index: 200;
+  }
+
+  .nav-item {
+    flex: 1;
+    padding: 8px 4px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'Heebo', sans-serif;
+    transition: color 0.15s;
+  }
+
+  .nav-item.active { color: var(--brown); font-weight: 700; }
+  .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 300;
+    align-items: flex-end;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: white;
+    border-radius: 20px 20px 0 0;
+    padding: 1.5rem;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 1.25rem;
+    text-align: center;
+  }
+
+  .form-group { margin-bottom: 14px; }
+
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Heebo', sans-serif;
+    color: var(--text);
+    background: white;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--brown);
+  }
+
+  textarea.form-input { min-height: 80px; resize: vertical; }
+
+  .form-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Heebo', sans-serif;
+    color: var(--text);
+    background: white;
+    appearance: none;
+  }
+
+  .stars-input { display: flex; gap: 8px; font-size: 24px; cursor: pointer; }
+  .star { color: #ddd; transition: color 0.1s; }
+  .star.filled { color: var(--brown-light); }
+
+  .btn {
+    width: 100%;
+    padding: 13px;
+    border-radius: var(--radius);
+    border: none;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Heebo', sans-serif;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: opacity 0.15s;
+  }
+
+  .btn-primary { background: var(--brown); color: white; }
+  .btn-secondary { background: var(--cream); color: var(--brown); }
+  .btn-danger { background: #fee2e2; color: #dc2626; margin-top: 10px; }
+
+  .btn:active { opacity: 0.8; }
+
+  /* AI button */
+  .ai-btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1.5px dashed var(--brown-light);
+    background: var(--cream);
+    color: var(--brown);
+    font-size: 13px;
+    font-family: 'Heebo', sans-serif;
+    cursor: pointer;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .ai-loading { animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+  /* Import section */
+  .import-section {
+    background: var(--cream);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 14px;
+  }
+
+  .import-title { font-size: 14px; font-weight: 700; color: var(--brown); margin-bottom: 8px; }
+  .import-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.5; }
+
+  /* Stats */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+
+  .stat-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+
+  .stat-num { font-size: 28px; font-weight: 700; color: var(--brown); }
+  .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  /* Wishlist empty */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+  }
+
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-text { font-size: 15px; }
+
+  /* Detail view */
+  .detail-section { margin-bottom: 16px; }
+  .detail-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 4px;
+  }
+
+  .user-review-card {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+
+  .user-review-name { font-size: 13px; font-weight: 700; color: var(--brown); margin-bottom: 4px; }
+
+  /* CSV mapping */
+  .mapping-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+
+  .mapping-label { flex: 1; color: var(--text-muted); }
+  .mapping-select { flex: 1; }
+
+  /* Notification */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--brown);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-family: 'Heebo', sans-serif;
+  }
+
+  .toast.show { opacity: 1; }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 1.25rem 6px;
+  }
+
+  .section-count { font-size: 13px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="header-title">📚 הספרים שלנו</div>
+      <div class="header-sub">ספרייה משפחתית משותפת</div>
+    </div>
+  </div>
+  <div class="user-pills">
+    <div class="pill active" onclick="setUser('אסנת')">אסנת</div>
+    <div class="pill inactive" onclick="setUser('אביה')">אביה</div>
+    <div class="pill inactive" onclick="setUser('אביטל')">אביטל</div>
+  </div>
+</div>
+
+<!-- Search -->
+<div class="search-wrap">
+  <input type="text" id="searchInput" placeholder="🔍 חפשי ספר לפני רכישה..." oninput="renderBooks()" />
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" onclick="setTab('all')">כל הספרים</div>
+  <div class="tab" onclick="setTab('read')">קראתי</div>
+  <div class="tab" onclick="setTab('wishlist')">Wishlist</div>
+  <div class="tab" onclick="setTab('stats')">סטטיסטיקות</div>
+</div>
+
+<!-- Main Content -->
+<div id="mainContent">
+
+  <!-- Books Tab -->
+  <div id="tab-all">
+    <div class="filters" id="filterBar">
+      <button class="filter-btn active" onclick="setFilter('all')">הכל</button>
+      <button class="filter-btn" onclick="setFilter('אסנת')">אצל אסנת</button>
+      <button class="filter-btn" onclick="setFilter('אביה')">אצל אביה</button>
+      <button class="filter-btn" onclick="setFilter('אביטל')">אצל אביטל</button>
+      <button class="filter-btn" onclick="setFilter('digital')">דיגיטלי</button>
+      <button class="filter-btn" onclick="setFilter('archived')">ארכיון</button>
+    </div>
+    <div class="sort-bar">
+      <span>מיון:</span>
+      <select onchange="setSort(this.value)">
+        <option value="newest">חדש ביותר</option>
+        <option value="title">שם ספר</option>
+        <option value="author">מחבר</option>
+      </select>
+    </div>
+    <div class="section-header">
+      <span class="section-count" id="bookCount"></span>
+    </div>
+    <div class="content" id="bookList"></div>
+  </div>
+
+  <!-- Read Tab -->
+  <div id="tab-read" style="display:none">
+    <div class="content" id="readList"></div>
+  </div>
+
+  <!-- Wishlist Tab -->
+  <div id="tab-wishlist" style="display:none">
+    <div class="content" id="wishList"></div>
+  </div>
+
+  <!-- Stats Tab -->
+  <div id="tab-stats" style="display:none">
+    <div class="content">
+      <div class="stats-grid" id="statsGrid"></div>
+      <div id="importSection">
+        <div class="import-section">
+          <div class="import-title">📥 ייבוא מקובץ CSV/Excel</div>
+          <div class="import-desc">
+            ייצאי את הקובץ "הספרים שלנו" מGoogle Sheets כ-CSV.<br>
+            מיפוי עמודות: A=שם ספר, B=מחבר, C=מיקום, D=אסנת(p=כן), E=אביטל(p=כן), F=אביה(p=כן), G=הערות
+          </div>
+          <input type="file" id="csvFile" accept=".csv,.xlsx" style="display:none" onchange="importCSV(event)">
+          <button class="btn btn-secondary" onclick="document.getElementById('csvFile').click()">📂 בחרי קובץ לייבוא</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="openAddModal()">+</button>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="setTab('all')">
+    <span class="nav-icon">📚</span>ספרים
+  </div>
+  <div class="nav-item" onclick="setTab('read')">
+    <span class="nav-icon">✅</span>קראתי
+  </div>
+  <div class="nav-item" onclick="setTab('wishlist')">
+    <span class="nav-icon">⭐</span>Wishlist
+  </div>
+  <div class="nav-item" onclick="setTab('stats')">
+    <span class="nav-icon">📊</span>סטטיסטיקות
+  </div>
+</div>
+
+<!-- Add/Edit Book Modal -->
+<div class="modal-overlay" id="bookModal">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">הוספת ספר חדש</div>
+
+    <button class="ai-btn" id="aiBtn" onclick="fetchBookDetails()" style="display:none">
+      ✨ השלם פרטים אוטומטית עם AI
+    </button>
+
+    <div class="import-section" style="margin-bottom:14px">
+      <div class="import-title">פרטי ספר בסיסיים</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">שם הספר *</label>
+      <input class="form-input" id="f-title" placeholder="שם הספר" oninput="checkAIBtn()">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">שם המחבר/ת *</label>
+      <input class="form-input" id="f-author" placeholder="שם המחבר" oninput="checkAIBtn()">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">איפה נמצא הספר</label>
+      <select class="form-select" id="f-location">
+        <option value="אסנת">אצל אסנת</option>
+        <option value="אביה">אצל אביה</option>
+        <option value="אביטל">אצל אביטל</option>
+        <option value="עברית">עברית (דיגיטלי)</option>
+        <option value="סטימצקי">סטימצקי (דיגיטלי)</option>
+        <option value="אינדיבוק">אינדיבוק (דיגיטלי)</option>
+        <option value="אחר">אחר</option>
+      </select>
+    </div>
+
+    <div class="form-group" id="aiResults" style="display:none">
+      <div class="import-section">
+        <div class="import-title">📖 פרטים שנמצאו אוטומטית</div>
+        <div id="aiResultsContent"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">תקציר</label>
+      <textarea class="form-input" id="f-summary" placeholder="תקציר הספר"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">סדרה</label>
+      <input class="form-input" id="f-series" placeholder="שם הסדרה (אם רלוונטי)">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">מספר בסדרה</label>
+      <input class="form-input" id="f-series-num" placeholder="למשל: ספר 2" type="number">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">שנת פרסום</label>
+      <input class="form-input" id="f-year" placeholder="שנת פרסום" type="number">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">דירוג Goodreads</label>
+      <input class="form-input" id="f-goodreads" placeholder="למשל: 4.2" type="number" step="0.1">
+    </div>
+
+    <div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px">
+      <div class="import-title" style="font-size:13px;margin-bottom:10px">הדירוג והביקורת שלי (כמשתמשת הנוכחית)</div>
+
+      <div class="form-group">
+        <label class="form-label">קראתי את הספר?</label>
+        <select class="form-select" id="f-read">
+          <option value="no">לא</option>
+          <option value="yes">כן</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">דירוג שלי</label>
+        <div class="stars-input" id="starsInput">
+          <span class="star" onclick="setStar(1)">★</span>
+          <span class="star" onclick="setStar(2)">★</span>
+          <span class="star" onclick="setStar(3)">★</span>
+          <span class="star" onclick="setStar(4)">★</span>
+          <span class="star" onclick="setStar(5)">★</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">ביקורת / המלצה</label>
+        <textarea class="form-input" id="f-review" placeholder="מה חשבתי על הספר..."></textarea>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">הערות כלליות</label>
+      <textarea class="form-input" id="f-notes" placeholder="הערות נוספות..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">
+        <input type="checkbox" id="f-wishlist"> הוסף ל-Wishlist
+      </label>
+    </div>
+
+    <button class="btn btn-primary" onclick="saveBook()">💾 שמור ספר</button>
+    <button class="btn btn-secondary" onclick="closeModal('bookModal')">ביטול</button>
+    <button class="btn btn-danger" id="deleteBtn" onclick="deleteBook()" style="display:none">🗑️ מחק ספר</button>
+  </div>
+</div>
+
+<script>
+// ====== STATE ======
+let currentUser = 'אסנת';
+let currentTab = 'all';
+let currentFilter = 'all';
+let currentSort = 'newest';
+let editingId = null;
+let currentStars = 0;
+let books = [];
+
+// Supabase config - REPLACE WITH YOUR VALUES
+// הכניסי את הערכים שלך כאן:
+const SUPABASE_URL = 'https://afhduqgdvqwyezumrpyn.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_47gNrtCaTpqUNpfVno33Rw_BNEM2DfE';
+const ANTHROPIC_KEY = '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';
+
+// ====== SUPABASE ======
+async function supabase(method, path, body) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    method,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : 'return=minimal'
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+async function loadBooks() {
+  try {
+    const data = await supabase('GET', 'books?order=created_at.desc');
+    books = data || [];
+  } catch(e) {
+    books = JSON.parse(localStorage.getItem('books') || '[]');
+  }
+  renderBooks();
+  renderStats();
+}
+
+async function saveToSupabase(book) {
+  try {
+    if (book.id && !book.id.startsWith('local_')) {
+      await supabase('PATCH', `books?id=eq.${book.id}`, book);
+    } else {
+      const result = await supabase('POST', 'books', book);
+      if (result && result[0]) book.id = result[0].id;
+    }
+  } catch(e) {
+    localStorage.setItem('books', JSON.stringify(books));
+  }
+}
+
+async function deleteFromSupabase(id) {
+  try {
+    if (!id.startsWith('local_')) {
+      await supabase('DELETE', `books?id=eq.${id}`);
+    }
+  } catch(e) {}
+  localStorage.setItem('books', JSON.stringify(books));
+}
+
+// ====== USERS ======
+function setUser(user) {
+  currentUser = user;
+  document.querySelectorAll('.pill').forEach(p => {
+    p.className = 'pill ' + (p.textContent === user ? 'active' : 'inactive');
+  });
+  renderBooks();
+}
+
+// ====== TABS ======
+function setTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const tabs = ['all','read','wishlist','stats'];
+    t.className = 'tab' + (tabs[i] === tab ? ' active' : '');
+  });
+  document.querySelectorAll('.nav-item').forEach((n,i) => {
+    const tabs = ['all','read','wishlist','stats'];
+    n.className = 'nav-item' + (tabs[i] === tab ? ' active' : '');
+  });
+  ['all','read','wishlist','stats'].forEach(t => {
+    const el = document.getElementById(`tab-${t}`);
+    if (el) el.style.display = t === tab ? 'block' : 'none';
+  });
+  if (tab === 'read') renderReadList();
+  if (tab === 'wishlist') renderWishlist();
+  if (tab === 'stats') renderStats();
+}
+
+// ====== FILTERS ======
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.className = 'filter-btn' + (b.textContent.includes(f) || (f==='all' && b.textContent==='הכל') ? ' active' : '');
+  });
+  renderBooks();
+}
+
+function setSort(s) { currentSort = s; renderBooks(); }
+
+// ====== RENDER BOOKS ======
+function renderBooks() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  let filtered = books.filter(b => {
+    if (currentFilter === 'archived') return b.archived;
+    if (b.archived) return false;
+    const matchSearch = !search || b.title?.toLowerCase().includes(search) || b.author?.toLowerCase().includes(search);
+    if (!matchSearch) return false;
+    if (currentFilter === 'all') return true;
+    if (currentFilter === 'digital') return ['עברית','סטימצקי','אינדיבוק'].includes(b.location);
+    return b.location === currentFilter;
+  });
+
+  if (currentSort === 'title') filtered.sort((a,b) => a.title?.localeCompare(b.title, 'he'));
+  else if (currentSort === 'author') filtered.sort((a,b) => a.author?.localeCompare(b.author, 'he'));
+
+  document.getElementById('bookCount').textContent = `${filtered.length} ספרים`;
+
+  const html = filtered.map(b => bookCard(b)).join('');
+  document.getElementById('bookList').innerHTML = html || '<div class="empty-state"><div class="empty-icon">📚</div><div class="empty-text">אין ספרים</div></div>';
+}
+
+function bookCard(b) {
+  const userRead = b[`read_${currentUser}`];
+  const userRating = b[`rating_${currentUser}`] || 0;
+  const userReview = b[`review_${currentUser}`] || '';
+  const stars = userRating ? '★'.repeat(userRating) + '☆'.repeat(5-userRating) : '';
+  const isDigital = ['עברית','סטימצקי','אינדיבוק'].includes(b.location);
+
+  return `
+    <div class="book-card ${b.archived ? 'archived' : ''}" onclick="openEditModal('${b.id}')">
+      <button class="archive-btn" onclick="event.stopPropagation();toggleArchive('${b.id}')" title="${b.archived ? 'הוצא מארכיון' : 'העבר לארכיון'}">
+        ${b.archived ? '📤' : '📦'}
+      </button>
+      <div class="book-title">${b.title || ''}</div>
+      <div class="book-author">${b.author || ''}</div>
+      <div class="book-badges">
+        <span class="badge badge-location">${isDigital ? '📱 ' : '📍 '}${b.location || ''}</span>
+        ${userRead ? '<span class="badge badge-read">✓ קראתי</span>' : '<span class="badge badge-unread">לא קראתי</span>'}
+        ${b.wishlist ? '<span class="badge badge-wish">⭐ Wishlist</span>' : ''}
+        ${b.series ? `<span class="badge badge-series">📖 ${b.series}${b.series_num ? ' #'+b.series_num : ''}</span>` : ''}
+        ${b.archived ? '<span class="badge badge-archived">📦 ארכיון</span>' : ''}
+      </div>
+      ${stars ? `<div class="book-stars">${stars}</div>` : ''}
+      ${userReview ? `<div class="book-review">"${userReview}"</div>` : ''}
+    </div>
+  `;
+}
+
+function renderReadList() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const read = books.filter(b => !b.archived && b[`read_${currentUser}`] &&
+    (!search || b.title?.toLowerCase().includes(search) || b.author?.toLowerCase().includes(search)));
+  document.getElementById('readList').innerHTML = read.length ?
+    read.map(b => bookCard(b)).join('') :
+    '<div class="empty-state"><div class="empty-icon">📖</div><div class="empty-text">עדיין לא קראת ספרים</div></div>';
+}
+
+function renderWishlist() {
+  const wish = books.filter(b => !b.archived && b.wishlist);
+  document.getElementById('wishList').innerHTML = wish.length ?
+    wish.map(b => bookCard(b)).join('') :
+    '<div class="empty-state"><div class="empty-icon">⭐</div><div class="empty-text">אין ספרים ב-Wishlist</div></div>';
+}
+
+function renderStats() {
+  const active = books.filter(b => !b.archived);
+  const users = ['אסנת','אביה','אביטל'];
+  const grid = users.map(u => `
+    <div class="stat-card">
+      <div class="stat-num">${active.filter(b => b[`read_${u}`]).length}</div>
+      <div class="stat-label">${u} קראה</div>
+    </div>
+  `).join('');
+
+  const total = `<div class="stat-card"><div class="stat-num">${active.length}</div><div class="stat-label">סה"כ ספרים</div></div>`;
+  const wish = `<div class="stat-card"><div class="stat-num">${active.filter(b=>b.wishlist).length}</div><div class="stat-label">Wishlist</div></div>`;
+
+  document.getElementById('statsGrid').innerHTML = total + grid + wish;
+}
+
+// ====== ARCHIVE ======
+async function toggleArchive(id) {
+  const book = books.find(b => b.id === id);
+  if (!book) return;
+  book.archived = !book.archived;
+  await saveToSupabase(book);
+  renderBooks();
+  showToast(book.archived ? '📦 הועבר לארכיון' : '📤 הוצא מארכיון');
+}
+
+// ====== MODAL ======
+function openAddModal() {
+  editingId = null;
+  currentStars = 0;
+  document.getElementById('modalTitle').textContent = 'הוספת ספר חדש';
+  document.getElementById('deleteBtn').style.display = 'none';
+  document.getElementById('aiResults').style.display = 'none';
+  ['title','author','summary','series','series-num','year','goodreads','review','notes'].forEach(f => {
+    document.getElementById(`f-${f}`).value = '';
+  });
+  document.getElementById('f-read').value = 'no';
+  document.getElementById('f-wishlist').checked = false;
+  updateStars(0);
+  checkAIBtn();
+  document.getElementById('bookModal').classList.add('open');
+}
+
+function openEditModal(id) {
+  const book = books.find(b => b.id === id);
+  if (!book) return;
+  editingId = id;
+  currentStars = book[`rating_${currentUser}`] || 0;
+
+  document.getElementById('modalTitle').textContent = 'עריכת ספר';
+  document.getElementById('deleteBtn').style.display = 'block';
+  document.getElementById('f-title').value = book.title || '';
+  document.getElementById('f-author').value = book.author || '';
+  document.getElementById('f-location').value = book.location || 'אסנת';
+  document.getElementById('f-summary').value = book.summary || '';
+  document.getElementById('f-series').value = book.series || '';
+  document.getElementById('f-series-num').value = book.series_num || '';
+  document.getElementById('f-year').value = book.year || '';
+  document.getElementById('f-goodreads').value = book.goodreads_rating || '';
+  document.getElementById('f-read').value = book[`read_${currentUser}`] ? 'yes' : 'no';
+  document.getElementById('f-review').value = book[`review_${currentUser}`] || '';
+  document.getElementById('f-notes').value = book.notes || '';
+  document.getElementById('f-wishlist').checked = book.wishlist || false;
+  document.getElementById('aiResults').style.display = 'none';
+
+  updateStars(currentStars);
+  checkAIBtn();
+  document.getElementById('bookModal').classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ====== STARS ======
+function setStar(n) { currentStars = n; updateStars(n); }
+
+function updateStars(n) {
+  document.querySelectorAll('.star').forEach((s,i) => {
+    s.className = 'star' + (i < n ? ' filled' : '');
+  });
+}
+
+// ====== SAVE/DELETE ======
+async function saveBook() {
+  const title = document.getElementById('f-title').value.trim();
+  const author = document.getElementById('f-author').value.trim();
+  if (!title || !author) { showToast('⚠️ שם ספר ומחבר הם שדות חובה'); return; }
+
+  const book = editingId ? books.find(b => b.id === editingId) : {
+    id: 'local_' + Date.now(),
+    created_at: new Date().toISOString()
+  };
+
+  book.title = title;
+  book.author = author;
+  book.location = document.getElementById('f-location').value;
+  book.summary = document.getElementById('f-summary').value;
+  book.series = document.getElementById('f-series').value;
+  book.series_num = document.getElementById('f-series-num').value;
+  book.year = document.getElementById('f-year').value;
+  book.goodreads_rating = document.getElementById('f-goodreads').value;
+  book[`read_${currentUser}`] = document.getElementById('f-read').value === 'yes';
+  book[`rating_${currentUser}`] = currentStars;
+  book[`review_${currentUser}`] = document.getElementById('f-review').value;
+  book.notes = document.getElementById('f-notes').value;
+  book.wishlist = document.getElementById('f-wishlist').checked;
+
+  if (!editingId) books.unshift(book);
+
+  await saveToSupabase(book);
+  closeModal('bookModal');
+  renderBooks();
+  renderStats();
+  showToast('✅ הספר נשמר!');
+}
+
+async function deleteBook() {
+  if (!editingId) return;
+  if (!confirm('האם למחוק את הספר?')) return;
+  await deleteFromSupabase(editingId);
+  books = books.filter(b => b.id !== editingId);
+  closeModal('bookModal');
+  renderBooks();
+  renderStats();
+  showToast('🗑️ הספר נמחק');
+}
+
+// ====== AI ======
+function checkAIBtn() {
+  const title = document.getElementById('f-title').value.trim();
+  const author = document.getElementById('f-author').value.trim();
+  document.getElementById('aiBtn').style.display = (title && author) ? 'flex' : 'none';
+}
+
+async function fetchBookDetails() {
+  const title = document.getElementById('f-title').value.trim();
+  const author = document.getElementById('f-author').value.trim();
+  if (!title || !author) return;
+
+  const btn = document.getElementById('aiBtn');
+  btn.innerHTML = '<span class="ai-loading">⏳ מחפש פרטים...</span>';
+  btn.disabled = true;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{
+          role: 'user',
+          content: `חפש באינטרנט את הספר "${title}" מאת "${author}". חפש באתרים כמו עברית.com, סטימצקי, Goodreads. אם מצאת את הספר, החזר JSON בלבד עם המפתחות: summary (תקציר עלילתי 4-6 משפטים על הדמויות והקונפליקט), year (שנת פרסום), original_title (שם מקורי אם תורגם), series_name (שם סדרה או "Stand Alone"), series_number (מספר בסדרה), goodreads_rating. אם לא מצאת - החזר {"not_found": true}`
+        }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content?.filter(c => c.type === 'text').map(c => c.text).join('');
+
+    let parsed;
+    try {
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
+    } catch(e) {}
+
+    if (!parsed || parsed.not_found) {
+      document.getElementById('aiResults').style.display = 'block';
+      document.getElementById('aiResultsContent').innerHTML = '<p style="color:#dc2626;font-size:13px">לא נמצא מידע על הספר — ניתן למלא ידנית</p>';
+    } else {
+      document.getElementById('f-summary').value = parsed.summary || '';
+      document.getElementById('f-year').value = parsed.year || '';
+      document.getElementById('f-series').value = parsed.series_name === 'Stand Alone' ? '' : (parsed.series_name || '');
+      document.getElementById('f-series-num').value = parsed.series_number || '';
+      document.getElementById('f-goodreads').value = parsed.goodreads_rating || '';
+
+      document.getElementById('aiResults').style.display = 'block';
+      document.getElementById('aiResultsContent').innerHTML = `
+        <p style="font-size:13px;color:var(--green)">✅ פרטים נמצאו ומולאו אוטומטית!</p>
+        ${parsed.series_name && parsed.series_name !== 'Stand Alone' ? `<p style="font-size:12px;color:var(--text-muted)">📖 סדרה: ${parsed.series_name} #${parsed.series_number || ''}</p>` : '<p style="font-size:12px;color:var(--text-muted)">📗 Stand Alone</p>'}
+      `;
+    }
+  } catch(e) {
+    document.getElementById('aiResults').style.display = 'block';
+    document.getElementById('aiResultsContent').innerHTML = '<p style="color:#dc2626;font-size:13px">שגיאה בחיפוש — בדקי את מפתח ה-API</p>';
+  }
+
+  btn.innerHTML = '✨ השלם פרטים אוטומטית עם AI';
+  btn.disabled = false;
+}
+
+// ====== CSV IMPORT ======
+function importCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const text = e.target.result;
+    const lines = text.split('\n');
+    let imported = 0;
+
+    lines.forEach((line, idx) => {
+      if (idx === 0) return; // skip header
+      const cols = parseCSVLine(line);
+      if (!cols[0]?.trim()) return;
+
+      const title = cols[0]?.trim();
+      const author = cols[1]?.trim();
+      if (!title) return;
+
+      // Check if already exists
+      const exists = books.find(b => b.title?.toLowerCase() === title.toLowerCase());
+      if (exists) return;
+
+      const book = {
+        id: 'local_' + Date.now() + '_' + idx,
+        created_at: new Date().toISOString(),
+        title,
+        author: author || '',
+        location: cols[2]?.trim() || '',
+        read_אסנת: isRead(cols[3]),
+        read_אביטל: isRead(cols[4]),
+        read_אביה: isRead(cols[5]),
+        notes: cols[6]?.trim() || '',
+        wishlist: false,
+        archived: false
+      };
+
+      books.push(book);
+      saveToSupabase(book);
+      imported++;
+    });
+
+    localStorage.setItem('books', JSON.stringify(books));
+    renderBooks();
+    renderStats();
+    showToast(`✅ יובאו ${imported} ספרים!`);
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let c of line) {
+    if (c === '"') inQuotes = !inQuotes;
+    else if (c === ',' && !inQuotes) { result.push(current); current = ''; }
+    else current += c;
+  }
+  result.push(current);
+  return result;
+}
+
+function isRead(val) {
+  if (!val) return false;
+  const v = val.trim().toLowerCase();
+  return v === 'p' || v === 'כן' || v === 'yes' || v === 'true' || v === '1';
+}
+
+// ====== TOAST ======
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ====== INIT ======
+loadBooks();
+</script>
+</body>
+</html>
