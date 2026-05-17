@@ -478,6 +478,29 @@
 <body>
 
 <!-- Toast -->
+
+<!-- Login Screen -->
+<div id="loginScreen" style="display:flex;position:fixed;inset:0;background:#FDF8F0;z-index:500;flex-direction:column;align-items:center;justify-content:center;padding:2rem;">
+  <div style="font-size:64px;margin-bottom:16px">📚</div>
+  <div style="font-size:26px;font-weight:700;color:#8B4513;margin-bottom:6px">הספרים שלנו</div>
+  <div style="font-size:14px;color:#7A5C4A;margin-bottom:40px">ספרייה משפחתית משותפת</div>
+  <div style="font-size:15px;color:#7A5C4A;margin-bottom:20px;font-weight:500">מי את?</div>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">
+    <div onclick="loginAs('אסנת')" style="background:white;border-radius:16px;padding:24px 20px;text-align:center;cursor:pointer;box-shadow:0 2px 12px rgba(139,69,19,0.12);min-width:100px;transition:transform 0.15s" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+      <div style="font-size:48px;margin-bottom:8px">📖</div>
+      <div style="font-size:16px;font-weight:700;color:#8B4513">אסנת</div>
+    </div>
+    <div onclick="loginAs('אביה')" style="background:white;border-radius:16px;padding:24px 20px;text-align:center;cursor:pointer;box-shadow:0 2px 12px rgba(139,69,19,0.12);min-width:100px;transition:transform 0.15s" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+      <div style="font-size:48px;margin-bottom:8px">📚</div>
+      <div style="font-size:16px;font-weight:700;color:#8B4513">אביה</div>
+    </div>
+    <div onclick="loginAs('אביטל')" style="background:white;border-radius:16px;padding:24px 20px;text-align:center;cursor:pointer;box-shadow:0 2px 12px rgba(139,69,19,0.12);min-width:100px;transition:transform 0.15s" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+      <div style="font-size:48px;margin-bottom:8px">📕</div>
+      <div style="font-size:16px;font-weight:700;color:#8B4513">אביטל</div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- Header -->
@@ -515,11 +538,17 @@
   <div id="tab-all">
     <div class="filters" id="filterBar">
       <button class="filter-btn active" onclick="setFilter('all')">הכל</button>
-      <button class="filter-btn" onclick="setFilter('אסנת')">אצל אסנת</button>
-      <button class="filter-btn" onclick="setFilter('אביה')">אצל אביה</button>
-      <button class="filter-btn" onclick="setFilter('אביטל')">אצל אביטל</button>
-      <button class="filter-btn" onclick="setFilter('digital')">דיגיטלי</button>
-      <button class="filter-btn" onclick="setFilter('archived')">ארכיון</button>
+      <button class="filter-btn" onclick="setFilter('read')">✅ קראתי</button>
+      <button class="filter-btn" onclick="setFilter('unread')">📖 לא קראתי</button>
+      <button class="filter-btn" onclick="setFilter('wishlist')">⭐ Wishlist</button>
+      <button class="filter-btn" onclick="setFilter('אסנת')">📍 אסנת</button>
+      <button class="filter-btn" onclick="setFilter('אביה')">📍 אביה</button>
+      <button class="filter-btn" onclick="setFilter('אביטל')">📍 אביטל</button>
+      <button class="filter-btn" onclick="toggleDigital()">📱 דיגיטלי ▾</button>
+      <button class="filter-btn digital-sub" onclick="setFilter('עברית')" style="display:none">עברית</button>
+      <button class="filter-btn digital-sub" onclick="setFilter('סטימצקי')" style="display:none">סטימצקי</button>
+      <button class="filter-btn digital-sub" onclick="setFilter('אינדיבוק')" style="display:none">אינדיבוק</button>
+      <button class="filter-btn" onclick="setFilter('archived')">📦 ארכיון</button>
     </div>
     <div class="sort-bar">
       <span>מיון:</span>
@@ -792,10 +821,23 @@ function setTab(tab) {
 }
 
 // ====== FILTERS ======
+function toggleDigital() {
+  const subs = document.querySelectorAll('.digital-sub');
+  const isVisible = subs[0].style.display !== 'none';
+  subs.forEach(s => s.style.display = isVisible ? 'none' : 'inline-block');
+}
+
 function setFilter(f) {
   currentFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b => {
-    b.className = 'filter-btn' + (b.textContent.includes(f) || (f==='all' && b.textContent==='הכל') ? ' active' : '');
+    const txt = b.textContent.trim();
+    const isActive = (f === 'all' && txt === 'הכל') ||
+                     (f === 'read' && txt === '✅ קראתי') ||
+                     (f === 'unread' && txt === '📖 לא קראתי') ||
+                     (f === 'wishlist' && txt === '⭐ Wishlist') ||
+                     (f === 'archived' && txt === '📦 ארכיון') ||
+                     txt.includes(f);
+    b.className = 'filter-btn' + (b.classList.contains('digital-sub') ? ' digital-sub' : '') + (isActive ? ' active' : '');
   });
   renderBooks();
 }
@@ -811,7 +853,9 @@ function renderBooks() {
     const matchSearch = !search || b.title?.toLowerCase().includes(search) || b.author?.toLowerCase().includes(search);
     if (!matchSearch) return false;
     if (currentFilter === 'all') return true;
-    if (currentFilter === 'digital') return ['עברית','סטימצקי','אינדיבוק'].includes(b.location);
+    if (currentFilter === 'read') return b[`read_${currentUser}`];
+    if (currentFilter === 'unread') return !b[`read_${currentUser}`] && !b.wishlist;
+    if (currentFilter === 'wishlist') return b.wishlist;
     return b.location === currentFilter;
   });
 
@@ -982,6 +1026,22 @@ async function saveBook() {
   renderBooks();
   renderStats();
   showToast('✅ הספר נשמר!');
+  // Send notification to other users
+  if (!editingId && 'Notification' in window && Notification.permission === 'granted') {
+    new Notification('📚 ספר חדש נוסף!', {
+      body: `${currentUser} הוסיפה: ${book.title} מאת ${book.author}`,
+      icon: '/favicon.ico'
+    });
+  } else if (!editingId && 'Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') {
+        new Notification('📚 ספר חדש נוסף!', {
+          body: `${currentUser} הוסיפה: ${book.title} מאת ${book.author}`,
+          icon: '/favicon.ico'
+        });
+      }
+    });
+  }
 }
 
 async function deleteBook() {
@@ -1021,7 +1081,7 @@ async function fetchBookDetails() {
         tools: [{ type: 'web_search_20250305', name: 'web_search' }],
         messages: [{
           role: 'user',
-          content: `חפש באינטרנט את הספר "${title}" מאת "${author}". חפש באתרים כמו עברית.com, סטימצקי, Goodreads. אם מצאת את הספר, החזר JSON בלבד עם המפתחות: summary (תקציר עלילתי 4-6 משפטים על הדמויות והקונפליקט), year (שנת פרסום), original_title (שם מקורי אם תורגם), series_name (שם סדרה או "Stand Alone"), series_number (מספר בסדרה), goodreads_rating. אם לא מצאת - החזר {"not_found": true}`
+          content: `חפש באינטרנט את הספר "${title}" מאת "${author}". חפש בעיקר באתרים: ivrit.com (עברית), steimatzky.co.il (סטימצקי), indybook.co.il (אינדיבוק), goodreads.com. חפש בעברית ובאנגלית. אם מצאת, החזר JSON בלבד ללא טקסט נוסף עם המפתחות: summary (תקציר עלילתי 4-6 משפטים על הדמויות הראשיות והקונפליקט המרכזי בלבד - לא פרשנות כללית), year (שנת פרסום), original_title (שם מקורי אם תורגם לעברית), series_name (שם הסדרה אם חלק מסדרה, אחרת "Stand Alone"), series_number (מספר בסדרה), goodreads_rating. אם לא מצאת את הספר המדויק - החזר {"not_found": true} ואל תמציא פרטים.`
         }]
       })
     });
@@ -1138,8 +1198,40 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+
+// ====== PWA SERVICE WORKER ======
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('SW registered'))
+      .catch(err => console.log('SW error:', err));
+  });
+}
+
+// Show install prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const btn = document.createElement('button');
+  btn.textContent = '📲 הוסיפי לmסך הבית';
+  btn.style.cssText = 'position:fixed;bottom:90px;right:20px;background:#8B4513;color:white;border:none;border-radius:20px;padding:10px 16px;font-size:13px;font-family:Heebo,sans-serif;cursor:pointer;z-index:300;box-shadow:0 2px 12px rgba(0,0,0,0.2)';
+  btn.onclick = () => { deferredPrompt.prompt(); btn.remove(); };
+  document.body.appendChild(btn);
+  setTimeout(() => btn.remove(), 10000);
+});
+
 // ====== INIT ======
-loadBooks();
+function loginAs(user) {
+  currentUser = user;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.querySelectorAll('.pill').forEach(p => {
+    p.className = 'pill ' + (p.textContent === user ? 'active' : 'inactive');
+  });
+  loadBooks();
+}
+// Show login screen on load (don't auto-load)
+document.getElementById('loginScreen').style.display = 'flex';
 </script>
 </body>
 </html>
